@@ -9,7 +9,8 @@ namespace Oraculo
 {
     class Program
     {
-        private const string RedisConnectionString = "127.0.0.1:6379";
+        private static string chave;
+        private const string RedisConnectionString = "191.232.234.20:6379";
         private static ConnectionMultiplexer connection;
 
         private const string ChatChannel = "perguntas";
@@ -18,7 +19,8 @@ namespace Oraculo
         static void Main()
         {
             connection = ConnectionMultiplexer.Connect(RedisConnectionString);
-            
+            var db = connection.GetDatabase();
+
             oraculo_group = "wagner_group";
 
             var pubsub = connection.GetSubscriber();
@@ -32,7 +34,8 @@ namespace Oraculo
                 var resposta = Console.ReadLine();
                 if (resposta != "")
                 {
-                    pubsub.Publish(ChatChannel, $"{oraculo_group}: {resposta}");  
+                    //pubsub.Publish(ChatChannel, $"{oraculo_group}: {resposta}");  
+                    db.HashSet(chave, oraculo_group, resposta);
                 }
                 
             }
@@ -56,6 +59,7 @@ namespace Oraculo
 
                 var PerguntaNumero_GroupName = teste[0];
                 var Pergunta_Resposta = teste[1];
+                chave = PerguntaNumero_GroupName;
 
                 if (PerguntaNumero_GroupName != oraculo_group)
                 {
